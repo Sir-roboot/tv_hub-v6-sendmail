@@ -7,7 +7,8 @@ import { initializeSocket } from './realtime/socket.js';
 
 async function start(): Promise<void> {
   const httpServer = createServer(app);
-  initializeSocket(httpServer);
+  // TODO V6 SOCKET 1:
+  // Inicializa Socket.IO utilizando el mismo servidor HTTP de Express.
   await connectDatabase();
   // TODO V6 CRON 3:
   // Inicia el job automático después de conectar MongoDB.

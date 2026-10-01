@@ -95,18 +95,22 @@ async function closeReport(reportId) {
   applyRealtimeReport(report, false);
 }
 
-function connectSupportSocket() {
-  const socket = io();
-  socket.on('report:created', (report) => applyRealtimeReport(report, true));
-  socket.on('report:updated', (report) => applyRealtimeReport(report, false));
-}
+// TODO V6 SOCKET 5:
+// Conecta el Support Dashboard con Socket.IO.
+// Escucha report:created.
+// Primero puede validarse el payload con console.log.
+// Después utiliza applyRealtimeReport(report, true).
+
+// TODO V6 SOCKET 6:
+// Escucha report:updated y actualiza el Report existente
+// utilizando applyRealtimeReport(report, false).
 
 document.querySelector('#logout').addEventListener('click', async () => { await fetch('/api/auth/logout', { method: 'POST' }); location.href = '/login'; });
 reportsFilter.addEventListener('change', loadReports);
 async function start() {
   if (await loadUser()) {
     await loadReports();
-    connectSupportSocket();
+    // TODO V6 SOCKET 7: Inicia la conexión después de la carga HTTP inicial.
   }
 }
 start();

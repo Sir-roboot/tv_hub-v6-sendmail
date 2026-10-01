@@ -28,10 +28,10 @@ export function initializeSocket(server: HttpServer): Server {
       next(new Error('Invalid or expired access token'));
     }
   });
-  io.on('connection', (socket) => {
-    socket.join(socket.data.userId);
-    if (socket.data.role === 'ADMIN') socket.join('admins');
-  });
+  // TODO V6 SOCKET 2:
+  // Maneja nuevas conexiones.
+  // Cada socket autenticado debe unirse al room de su userId.
+  // Si el usuario tiene rol ADMIN, también debe unirse al room "admins".
   return io;
 }
 

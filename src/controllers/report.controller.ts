@@ -100,11 +100,9 @@ export const createReport: RequestHandler = async (request, response) => {
     // sendReportCreatedEmail(...). Proporciona los datos necesarios y maneja el
     // fallo localmente: el email es secundario y no debe revertir el Report.
 
-    emitReportCreated(userId, {
-      ...report.toObject(),
-      channelId: { _id: channel.id, name: channel.name },
-      userId: user ? { _id: user.id, email: user.email } : userId
-    });
+    // TODO V6 SOCKET 3:
+    // Después de persistir el Report, emite report:created.
+    // El evento debe llegar al usuario propietario y al room de administradores.
 
     response.status(201).json({ report });
   } catch (error) {
@@ -175,7 +173,9 @@ export const updateReport: RequestHandler = async (request, response) => {
   await report.save();
 
   await report.populate([{ path: 'channelId', select: 'name' }, { path: 'userId', select: 'email' }]);
-  emitReportUpdated(getUserId(request), report.toObject());
+  // TODO V6 SOCKET 4:
+  // Después de persistir la actualización, emite report:updated
+  // utilizando el helper existente.
   response.json({ report });
 };
 

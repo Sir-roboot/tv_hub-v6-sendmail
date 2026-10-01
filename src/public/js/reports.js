@@ -178,11 +178,12 @@ function applyRealtimeReport(report, isNew) {
   updateReportsCount();
 }
 
-function connectReportsSocket() {
-  const socket = io();
-  socket.on('report:created', (report) => applyRealtimeReport(report, true));
-  socket.on('report:updated', (report) => applyRealtimeReport(report, false));
-}
+// TODO V6 SOCKET 8:
+// Conecta esta página con Socket.IO después de la carga HTTP inicial.
+// Escucha report:created y aplica applyRealtimeReport(report, true).
+
+// TODO V6 SOCKET 9:
+// Escucha report:updated y aplica applyRealtimeReport(report, false).
 
 async function submitReport(event) {
   event.preventDefault();
@@ -225,7 +226,7 @@ async function start() {
   if (await loadUser()) {
     configureReportForm();
     await loadReports();
-    connectReportsSocket();
+    // TODO V6 SOCKET 10: Inicia la conexión en tiempo real.
   }
 }
 start();
