@@ -1,4 +1,4 @@
-import nodemailer, { type Transporter } from 'nodemailer';
+import nodemailer, { type SendMailOptions, type Transporter } from 'nodemailer';
 import { env } from '../config/env.js';
 
 type ReportEmailData = {
@@ -43,17 +43,9 @@ async function getTransporter(): Promise<Transporter> {
   return transporterPromise;
 }
 
-export async function sendReportCreatedEmail(report: ReportEmailData, channelName: string): Promise<void> {
+async function sendWithTransporter(message: SendMailOptions): Promise<void> {
   const transporter = await getTransporter();
-  const evidence = report.evidenceUrls.length
-    ? `\nEvidence:\n${report.evidenceUrls.join('\n')}`
-    : '';
-  const info = await transporter.sendMail({
-    from: env.smtpFrom,
-    to: env.reportNotificationEmail,
-    subject: 'TV Hub - New Report',
-    text: `TV Hub - New Report\n\nChannel: ${channelName}\nReason: ${report.reason}\nDescription: ${report.description}\nStatus: ${report.status}\nCreated date: ${report.createdAt.toLocaleString()}${evidence}`
-  });
+  const info = await transporter.sendMail(message);
 
   if (usesEthereal) {
     const previewUrl = nodemailer.getTestMessageUrl(info);
@@ -61,17 +53,17 @@ export async function sendReportCreatedEmail(report: ReportEmailData, channelNam
   }
 }
 
-export async function sendReportResolvedEmail(report: ReportEmailData, channelName: string, recipient: string): Promise<void> {
-  const transporter = await getTransporter();
-  const info = await transporter.sendMail({
-    from: env.smtpFrom,
-    to: recipient,
-    subject: 'TV Hub - Your Report Was Resolved',
-    text: `TV Hub - Your Report Was Resolved\n\nChannel: ${channelName}\nReason: ${report.reason}\nDescription: ${report.description}\nStatus: ${report.status}\nCreated date: ${report.createdAt.toLocaleString()}\n\nSupport has closed this report.`
-  });
+export async function sendReportCreatedEmail(report: ReportEmailData, channelName: string): Promise<void> {
+  // TODO V6 MAIL 1
+  // Construye la notificación de Report creado con los datos recibidos: canal,
+  // reason, descripción, status y fecha de creación. Define un asunto adecuado
+  // y usa el helper de transporte existente para enviarla con Nodemailer.
+}
 
-  if (usesEthereal) {
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) console.log(`Email preview: ${previewUrl}`);
-  }
+export async function sendReportResolvedEmail(report: ReportEmailData, channelName: string, recipient: string): Promise<void> {
+  // TODO V6 MAIL 2
+  // Construye la notificación de Report resuelto para el destinatario recibido.
+  // Incluye información relevante como identificador, canal, status final y
+  // fecha de resolución, además de datos del administrador si están disponibles.
+  // Reutiliza el helper de transporte y el preview de Ethereal ya disponibles.
 }

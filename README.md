@@ -4,6 +4,20 @@ Proyecto de clase con Node.js, Express, TypeScript, MongoDB y Mongoose. Esta ver
 
 TV Hub V6 agrega operaciones de soporte sobre Reports: correo con Nodemailer, escalación programada con node-cron, sincronización en tiempo real con Socket.IO, cierre administrativo y métricas de atención. Los usuarios ven sus propios Reports; el rol `ADMIN` usa `/support-reports.html` y `/support-metrics.html`. Consulte [la guía de operaciones de V6](docs/tv-hub-v6-operations.md).
 
+## Session 15: TODOs pendientes de V6
+
+Esta rama conserva siete puntos de trabajo para Session 15. Los TODOs históricos de V4 y V4.5 no forman parte de esta lista.
+
+| TODO | Archivo | Actividad |
+| --- | --- | --- |
+| TODO V6 CRON 1 | `src/jobs/report-escalation.job.ts` | Escalar Reports `OPEN` vencidos, persistirlos y emitir su actualización. |
+| TODO V6 CRON 2 | `src/jobs/report-escalation.job.ts` | Programar el job periódico con `node-cron` y manejar sus errores. |
+| TODO V6 CRON 3 | `src/server.ts` | Iniciar el job después de conectar MongoDB. |
+| TODO V6 MAIL 1 | `src/notifications/report-email.ts` | Construir el email de creación de un Report. |
+| TODO V6 MAIL 2 | `src/notifications/report-email.ts` | Construir el email de resolución de un Report. |
+| TODO V6 MAIL 3 | `src/controllers/report.controller.ts` | Intentar el email de creación después de persistir, sin revertir el Report ante un fallo. |
+| TODO V6 MAIL 4 | `src/controllers/report.controller.ts` | Intentar el email de resolución después de persistir, sin revertir el cierre ante un fallo. |
+
 ## Práctica Integradora 1
 
 - El registro, login, refresh y logout de V1 siguen funcionando.

@@ -9,13 +9,7 @@ import { Report } from '../src/models/report.model.js';
 import { Session } from '../src/models/session.model.js';
 import { User } from '../src/models/user.model.js';
 import { reportUploadsDirectory } from '../src/middleware/upload.js';
-import { sendReportCreatedEmail, sendReportResolvedEmail } from '../src/notifications/report-email.js';
 import { emitReportCreated, emitReportUpdated } from '../src/realtime/socket.js';
-
-jest.mock('../src/notifications/report-email.js', () => ({
-  sendReportCreatedEmail: jest.fn(),
-  sendReportResolvedEmail: jest.fn()
-}));
 
 jest.mock('../src/realtime/socket.js', () => ({
   emitReportCreated: jest.fn(),
@@ -93,27 +87,13 @@ test('an authenticated user can create and list a report', async () => {
   expect(listed.body.reports).toHaveLength(1);
   expect(listed.body.reports[0].channelId).toEqual(expect.objectContaining({ name: 'Report Channel' }));
   expect(listed.body.reports[0].evidenceUrls).toEqual([]);
-  expect(sendReportCreatedEmail).toHaveBeenCalledWith(
-    expect.objectContaining({ description: 'The channel has no sound.' }),
-    'Report Channel'
-  );
   expect(emitReportCreated).toHaveBeenCalledWith(
     expect.any(String),
     expect.objectContaining({ channelId: expect.objectContaining({ name: 'Report Channel' }) })
   );
 });
 
-test('a notification failure does not undo a persisted report', async () => {
-  const agent = await registerAgent('notification-failure@example.com');
-  (sendReportCreatedEmail as jest.Mock).mockRejectedValueOnce(new Error('Email provider unavailable'));
-  const logError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
-
-  const created = await agent.post('/api/reports').field(reportFields()).expect(201);
-
-  expect(await Report.exists({ _id: created.body.report._id })).not.toBeNull();
-  expect(emitReportCreated).toHaveBeenCalled();
-  logError.mockRestore();
-});
+test.todo('keeps a persisted report when the report-created email delivery fails');
 
 test('only an ADMIN can view the support report queue', async () => {
   const reporter = await registerAgent('support-reporter@example.com');
@@ -132,7 +112,7 @@ test('only an ADMIN can view the support report queue', async () => {
   }));
 });
 
-test('an ADMIN closes a report, notifies its owner, and the owner sees RESOLVED', async () => {
+test('an ADMIN closes a report and the owner sees RESOLVED', async () => {
   const owner = await registerAgent('close-owner@example.com');
   const created = await owner.post('/api/reports').field(reportFields()).expect(201);
   const admin = await registerAgent('close-admin@example.com');
@@ -143,11 +123,6 @@ test('an ADMIN closes a report, notifies its owner, and the owner sees RESOLVED'
   const closed = await admin.patch(`/api/admin/reports/${created.body.report._id}/close`).expect(200);
 
   expect(closed.body.report).toEqual(expect.objectContaining({ status: 'RESOLVED', resolvedAt: expect.any(String) }));
-  expect(sendReportResolvedEmail).toHaveBeenCalledWith(
-    expect.objectContaining({ status: 'RESOLVED' }),
-    'Report Channel',
-    'close-owner@example.com'
-  );
   expect(emitReportUpdated).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ status: 'RESOLVED' }));
   const ownerReports = await owner.get('/api/reports').expect(200);
   expect(ownerReports.body.reports[0]).toEqual(expect.objectContaining({ status: 'RESOLVED', resolvedAt: expect.any(String) }));

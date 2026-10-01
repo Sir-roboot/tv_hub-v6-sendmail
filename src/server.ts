@@ -9,7 +9,9 @@ async function start(): Promise<void> {
   const httpServer = createServer(app);
   initializeSocket(httpServer);
   await connectDatabase();
-  startReportEscalationJob();
+  // TODO V6 CRON 3:
+  // Inicia el job automático después de conectar MongoDB.
+  // El job debe comenzar antes de que la aplicación quede operativa.
   httpServer.listen(env.port, () => console.log(`TV Hub listening on http://localhost:${env.port}`));
 }
 
