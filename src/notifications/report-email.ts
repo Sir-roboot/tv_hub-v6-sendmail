@@ -7,6 +7,7 @@ type ReportEmailData = {
   status: string;
   createdAt: Date;
   evidenceUrls: string[];
+  resolvedAt?: Date | null;
 };
 
 let transporterPromise: Promise<Transporter> | undefined;
@@ -54,16 +55,55 @@ async function sendWithTransporter(message: SendMailOptions): Promise<void> {
 }
 
 export async function sendReportCreatedEmail(report: ReportEmailData, channelName: string): Promise<void> {
-  // TODO V6 MAIL 1
-  // Construye la notificación de Report creado con los datos recibidos: canal,
-  // reason, descripción, status y fecha de creación. Define un asunto adecuado
-  // y usa el helper de transporte existente para enviarla con Nodemailer.
+  const createdAt = new Intl.DateTimeFormat('es-MX', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'America/Mexico_City'
+  }).format(report.createdAt);
+
+  await sendWithTransporter({
+    from: env.smtpFrom,
+    to: env.reportNotificationEmail,
+    subject: `[TV Hub] Nuevo reporte: ${channelName}`,
+    text: [
+      'Se creó un nuevo reporte de canal.',
+      '',
+      `Canal: ${channelName}`,
+      `Razón: ${report.reason}`,
+      `Descripción: ${report.description}`,
+      `Estado: ${report.status}`,
+      `Fecha de creación: ${createdAt}`
+    ].join('\n')
+  });
 }
 
 export async function sendReportResolvedEmail(report: ReportEmailData, channelName: string, recipient: string): Promise<void> {
-  // TODO V6 MAIL 2
-  // Construye la notificación de Report resuelto para el destinatario recibido.
-  // Incluye información relevante como identificador, canal, status final y
-  // fecha de resolución, además de datos del administrador si están disponibles.
-  // Reutiliza el helper de transporte y el preview de Ethereal ya disponibles.
+  const createdAt = new Intl.DateTimeFormat('es-MX', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'America/Mexico_City'
+  }).format(report.createdAt);
+  const resolvedAt = report.resolvedAt
+    ? new Intl.DateTimeFormat('es-MX', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'America/Mexico_City'
+      }).format(report.resolvedAt)
+    : undefined;
+
+  await sendWithTransporter({
+    from: env.smtpFrom,
+    to: recipient,
+    subject: `[TV Hub] Tu reporte de ${channelName} fue resuelto`,
+    text: [
+      'El equipo de soporte resolvió tu reporte.',
+      '',
+      `Canal: ${channelName}`,
+      `Razón: ${report.reason}`,
+      `Descripción: ${report.description}`,
+      `Estado final: ${report.status}`,
+      `Fecha del reporte: ${createdAt}`,
+      ...(resolvedAt ? [`Fecha de resolución: ${resolvedAt}`] : [])
+    ].join('\n')
+  });
 }

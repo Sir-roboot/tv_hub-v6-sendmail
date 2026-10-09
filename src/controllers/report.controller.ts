@@ -152,10 +152,20 @@ export const createReport: RequestHandler = async (request, response) => {
     });
     const user = await User.findById(userId).select("email");
 
-    // TODO V6 MAIL 3
-    // Después de persistir el Report, intenta enviar la notificación con
-    // sendReportCreatedEmail(...). Proporciona los datos necesarios y maneja el
-    // fallo localmente: el email es secundario y no debe revertir el Report.
+    try {
+      await sendReportCreatedEmail(
+        {
+          reason: report.reason,
+          description: report.description,
+          status: report.status,
+          createdAt: report.createdAt,
+          evidenceUrls: report.evidenceUrls,
+        },
+        channel.name,
+      );
+    } catch (error) {
+      console.error("Report was saved, but its notification email failed:", error);
+    }
 
     // TODO V6 SOCKET 3:
     // Después de persistir el Report, emite report:created.
@@ -323,10 +333,28 @@ export const closeSupportReport: RequestHandler = async (request, response) => {
   const reporter = report.userId as unknown as { email?: string };
   const channel = report.channelId as unknown as { name?: string };
 
-  // TODO V6 MAIL 4
-  // Si la resolución fue persistida, intenta notificarla con
-  // sendReportResolvedEmail(...). Un fallo de entrega no debe deshacer el
-  // status RESOLVED, resolvedAt ni resolvedBy ya guardados.
+  if (!wasAlreadyClosed) {
+    if (reporter.email) {
+      try {
+        await sendReportResolvedEmail(
+          {
+            reason: report.reason,
+            description: report.description,
+            status: report.status,
+            createdAt: report.createdAt,
+            evidenceUrls: report.evidenceUrls,
+            resolvedAt: report.resolvedAt,
+          },
+          channel.name ?? "Unknown channel",
+          reporter.email,
+        );
+      } catch (error) {
+        console.error("Report was resolved, but its notification email failed:", error);
+      }
+    } else {
+      console.error("Report was resolved, but the reporter has no email address.");
+    }
+  }
 
   if (!wasAlreadyClosed) emitReportUpdated(userId, report.toObject());
   response.json({ report });
