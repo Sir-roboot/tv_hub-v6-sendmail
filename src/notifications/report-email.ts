@@ -55,6 +55,10 @@ async function sendWithTransporter(message: SendMailOptions): Promise<void> {
 }
 
 export async function sendReportCreatedEmail(report: ReportEmailData, channelName: string): Promise<void> {
+  // TODO V6 MAIL 1
+  // Construye la notificación de Report creado con los datos recibidos: canal,
+  // reason, descripción, status y fecha de creación. Define un asunto adecuado
+  // y usa el helper de transporte existente para enviarla con Nodemailer.
   const createdAt = new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'medium',
     timeStyle: 'short',
@@ -78,6 +82,11 @@ export async function sendReportCreatedEmail(report: ReportEmailData, channelNam
 }
 
 export async function sendReportResolvedEmail(report: ReportEmailData, channelName: string, recipient: string): Promise<void> {
+  // TODO V6 MAIL 2
+  // Construye la notificación de Report resuelto para el destinatario recibido.
+  // Incluye información relevante como identificador, canal, status final y
+  // fecha de resolución, además de datos del administrador si están disponibles.
+  // Reutiliza el helper de transporte y el preview de Ethereal ya disponibles.
   const createdAt = new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'medium',
     timeStyle: 'short',

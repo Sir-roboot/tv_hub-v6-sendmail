@@ -152,6 +152,10 @@ export const createReport: RequestHandler = async (request, response) => {
     });
     const user = await User.findById(userId).select("email");
 
+    // TODO V6 MAIL 3
+    // Después de persistir el Report, intenta enviar la notificación con
+    // sendReportCreatedEmail(...). Proporciona los datos necesarios y maneja el
+    // fallo localmente: el email es secundario y no debe revertir el Report.
     try {
       await sendReportCreatedEmail(
         {
@@ -333,6 +337,10 @@ export const closeSupportReport: RequestHandler = async (request, response) => {
   const reporter = report.userId as unknown as { email?: string };
   const channel = report.channelId as unknown as { name?: string };
 
+  // TODO V6 MAIL 4
+  // Si la resolución fue persistida, intenta notificarla con
+  // sendReportResolvedEmail(...). Un fallo de entrega no debe deshacer el
+  // status RESOLVED, resolvedAt ni resolvedBy ya guardados.
   if (!wasAlreadyClosed) {
     if (reporter.email) {
       try {
